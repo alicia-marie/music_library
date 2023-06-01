@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route} from "react"
 import Gallery from './components/Gallery'
 import SearchBar from './components/SearchBar'
+import { DataContext } from './context/DataContext'
+import { SearchContext } from './contexts/SearchContext';
 import './App.css';
 
 function App() {
-  let [search, setSearch] = useState('Lizzo')
   let [message, setMessage] = useState('Search for Music')
   let [data, setData] = useState('')
+  let searchInput = useRef
 
-  useEffect(() => {
+  const handleSearch = (e, search) => {
+    e.preventDefault();
     const fetchData = async () => {
       document.title = `${search} Music`
       const response = await fetch(`https://itunes.apple.com/search?term=${search}`);
@@ -23,19 +27,23 @@ function App() {
     if (search) {
       fetchData();
     }
-  }, [search]);
-
-  const handleSearch = (e, term) => {
-    e.preventDefault();
-    setSearch(term);
   }
 
   return (
     <div className="App"> 
-      <SearchBar handleSearch={handleSearch}/>
-      { message }
-      <Gallery data={data}/>
+      <SearchContext.Provider value={
+        {
+          term: searchInput,
+          handleSearch
+        }
+      }>
+        <SearchBar />  
+      </SearchContext.Provider>
 
+      { message }
+      <DataContext.Provider value={data} > 
+        <Gallery data={data}/>
+      </DataContext.Provider>
     </div>
   );
 }
